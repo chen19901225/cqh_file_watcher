@@ -1,0 +1,5 @@
+-i https://mirrors.aliyun.com/pypi/simple/ 
+click
+pyinotify
+flake8
+autopep8

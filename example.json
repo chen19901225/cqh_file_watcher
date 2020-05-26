@@ -1,0 +1,14 @@
+{
+    "directory": "/home/vagrant/code/note2",
+    "command_list": [
+        {
+            "pattern": ".*\\.rst",
+            "command": "/home/vagrant/env/default/bin/sphinx-build -M html . _build"
+        },
+        {
+            "pattern": ".*\\.(rst|py)",
+            "command": "/home/vagrant/env/default/bin/inv deploy-qq"
+        }
+
+    ]
+}
