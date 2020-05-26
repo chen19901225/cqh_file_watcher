@@ -1,5 +1,6 @@
 #!/usr/bin/python
 # coding:utf-8
+import traceback
 import shlex
 import subprocess
 import re
@@ -76,19 +77,28 @@ class EventHandler(ProcessEvent):
                 if pattern.match(event.name):
                     should_execute=True
             if should_execute:
-                logger.info("pattern:{}, name:{}, path:{}".format(
+                logger.info("pattern:{}, name:{}, path:{}, command:{}".format(
                     pattern,
                     event.name,
-                    event.path
+                    event.path,
+                    command
                 ))
                 cmd_list = shlex.split(command)
                 # logging.info("[system], cmd_list:{}".format(cmd_list))
-                process = subprocess.run(cmd_list, 
-                                        #  check=True,
-                                        stdout=LogPipe(logger.info),
-                                        stderr=LogPipe(logger.info),
-                                         universal_newlines=True,
-                                        cwd=self.directory)
+                try:
+                    process = subprocess.run(cmd_list, 
+                                            #  check=True,
+                                            stdout=LogPipe(logger.info),
+                                            stderr=LogPipe(logger.info),
+                                             universal_newlines=True,
+                                            cwd=self.directory)
+                except Exception as e:
+                    logger.exception("fail to run command:{}, {}".format(command,
+                                                                         e),
+                                     )
+                    raise
+                    
+                
                 logger.info("complete pattern:{}, name:{}, path:{}, command:{}".format(
                     pattern,
                     event.name,
