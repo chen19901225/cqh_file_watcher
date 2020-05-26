@@ -9,8 +9,11 @@
       become_method: sudo
     - name: copy file_watcher conf
       template:
-        src: '{{proj_dir}}/playbooks/conf/file_watcher.json.j2'
-        dest: '/etc/cqh_file_watcher.d/{{proj_name}}.json'
+        src: '{{item.src}}'
+        dest: '{{item.dest}}'
+      with_items:
+        - {"src": "{{proj_dir}}/playbooks/conf/file_watcher.json.j2", "dest": "/etc/cqh_file_watcher.d/{{proj_name}}.json"}
+        - {"src": "{{proj_dir}}/playbooks/conf/file_watcher_lint.json.j2", "dest": "/etc/cqh_file_watcher.d/lint_{{proj_name}}.json"}
       become: yes
       become_method: sudo
 
@@ -28,5 +31,6 @@
         state: 'restarted'
       with_items:
         - 'file_watcher_{{proj_name}}'
+        - 'file_watcher_lint_{{proj_name}}'
       become: yes
       become_method: sudo

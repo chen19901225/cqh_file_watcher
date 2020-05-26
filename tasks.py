@@ -1,5 +1,6 @@
 import os
 import json
+
 from invoke import task
 
 proj_name = 'cqh_file_watcher'
@@ -50,17 +51,20 @@ def get_local_kwargs(**kwargs):
         print(f'key={key},value={value}')
     return d
 
+
 @task
 def deploy_local(c):
-    deploy_tag = 'local'
+    # deploy_tag = 'local'
     kwargs = get_local_kwargs()
     line_kwargs = get_line_args(kwargs)
     ansible_cmd = f'ansible-playbook {proj_dir}/playbooks/deploy_local.yaml {line_kwargs}'
     print('ansible_cmd:{}'.format(ansible_cmd))
     c.run(ansible_cmd)
+
+
 @task
 def copy_files(c):
     kwargs = get_local_kwargs()
     line_kwargs = get_line_args(kwargs)
-    ansible_cmd =f"ansible-playbook {proj_dir}/playbooks/copy-files.yaml {line_kwargs}"
+    ansible_cmd = f"ansible-playbook {proj_dir}/playbooks/copy-files.yaml {line_kwargs}"
     c.run(ansible_cmd)
