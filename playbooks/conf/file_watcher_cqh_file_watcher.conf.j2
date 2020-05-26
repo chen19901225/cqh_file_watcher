@@ -1,0 +1,9 @@
+[program:file_watcher_{{proj_name}}]
+directory={{proj_dir}}
+command={{ansible_env.HOME}}/env/default/bin/cqh_file_watcher --conf=/etc/cqh_file_watcher.d/{{proj_name}}.json
+user={{ansible_env.USER}}
+autostart=true
+autorestart=true
+redirect_stderr=true
+kill_asgroup=true
+stdout_logfile={{ansible_env.HOME}}/logs/%(program_name)s.log
