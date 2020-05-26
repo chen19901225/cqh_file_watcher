@@ -1,7 +1,10 @@
 - hosts: localhost
+  gather_facts: yes
   vars:
     rst_ansible_project_files_dir: '{{ansible_env.HOME}}/code/note2/rst/ansible/ansible_project/files/cqh_file_watcher'
   tasks:
+    - debug:
+        var: ansible_env
     - name: create directory
       file: 
         path: '{{item}}'
@@ -18,4 +21,7 @@
       with_items:
         - 'setup.py'
         - 'tasks.py'
-        - 'playbooks/copy-files.yaml'
+    - name: sync files
+      synchronize:
+        src: '{{proj_dir}}/playbooks'
+        dest: '{{rst_ansible_project_files_dir}}/'

@@ -3,3 +3,4 @@ build/
 cqh_file_watcher.egg-info/
 dist
 venv/
+*.retry

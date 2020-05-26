@@ -2,6 +2,7 @@
 directory={{proj_dir}}
 command={{ansible_env.HOME}}/env/default/bin/cqh_file_watcher --conf=/etc/cqh_file_watcher.d/{{proj_name}}.json
 user={{ansible_env.USER}}
+environment=USER={{ansible_env.USER}};HOME={{ansible_env.HOME}}
 autostart=true
 autorestart=true
 redirect_stderr=true

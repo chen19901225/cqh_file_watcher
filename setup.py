@@ -4,8 +4,8 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name="cqh_file_watcher", # Replace with your own username
-    version="0.0.1",
+    name="cqh_file_watcher",  # Replace with your own username
+    version="0.0.2",
     author="chenqinghe",
     author_email="1832866299@qq.com",
     description="tools like vscode file-watcher but for command only",
