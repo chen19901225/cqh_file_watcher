@@ -37,7 +37,7 @@ class LogPipe(threading.Thread):
         """Run the thread, logging everything.
         """
         for line in iter(self.pipeReader.readline, ''):
-            self.level(self.prefix+line.strip("\n"))
+            self.log_func(self.prefix + line.strip("\n"))
 
         self.pipeReader.close()
 
@@ -72,7 +72,7 @@ class EventHandler(ProcessEvent):
             pattern = command_d.get("pattern")
             # generated_by_dict_unpack: command_d
             command = command_d["command"]
-            relative_path = event.pathname[len(self.directory)+1:]
+            relative_path = event.pathname[len(self.directory) + 1:]
             should_execute = False
             if not pattern:
                 should_execute = True
@@ -111,7 +111,6 @@ class EventHandler(ProcessEvent):
                     event.path,
                     command
                 ))
-                
 
 
 logger = logging.getLogger('cqh_file_watcher')
