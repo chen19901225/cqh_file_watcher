@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="cqh_file_watcher",  # Replace with your own username
-    version="0.0.6",
+    version="0.0.9.rc2",
     author="chenqinghe",
     author_email="1832866299@qq.com",
     description="tools like vscode file-watcher but for command only",
@@ -24,7 +24,7 @@ setuptools.setup(
     ],
     entry_points={
         "console_scripts": [
-            "cqh_file_watcher = cqh_file_watcher.main:main",
+            "cqh_file_watcher = cqh_file_watcher.run:main",
         ],
     },
     python_requires='>=3.6',

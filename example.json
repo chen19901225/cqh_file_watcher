@@ -3,7 +3,7 @@
     "command_list": [
         {
             "pattern": ".*\\.rst",
-            "command": "/home/vagrant/env/not_exists/bin/sphinx-build -M html . _build"
+            "command": "/home/vagrant/env/default/bin/sphinx-build -M html . _build"
         }
 
     ]

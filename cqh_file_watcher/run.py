@@ -16,13 +16,14 @@ import threading
 
 class LogPipe(threading.Thread):
 
-    def __init__(self, level):
+    def __init__(self, log_func, prefix=''):
         """Setup the object with a logger and a loglevel
         and start the thread
         """
         threading.Thread.__init__(self)
         self.daemon = False
-        self.level = level
+        self.log_func = log_func
+        self.prefix = prefix
         self.fdRead, self.fdWrite = os.pipe()
         self.pipeReader = os.fdopen(self.fdRead)
         self.start()
@@ -36,8 +37,7 @@ class LogPipe(threading.Thread):
         """Run the thread, logging everything.
         """
         for line in iter(self.pipeReader.readline, ''):
-            self.level(line.strip("\n"))
-            # logging.log(self.level, line.strip('\n'))
+            self.level(self.prefix+line.strip("\n"))
 
         self.pipeReader.close()
 
@@ -52,7 +52,7 @@ class EventHandler(ProcessEvent):
         super().__init__()
         self.logger = logger
         self.command_list = command_list
-        self.directory = directory
+        self.directory = directory.rstrip("/")
 
     def process_IN_CREATE(self, event):
         self.handle_event(event)
@@ -72,6 +72,7 @@ class EventHandler(ProcessEvent):
             pattern = command_d.get("pattern")
             # generated_by_dict_unpack: command_d
             command = command_d["command"]
+            relative_path = event.pathname[len(self.directory)+1:]
             should_execute = False
             if not pattern:
                 should_execute = True
@@ -79,12 +80,13 @@ class EventHandler(ProcessEvent):
                 if not pattern.endswith("$"):
                     pattern += "$"
                 pattern = re.compile(pattern)
-                if pattern.match(event.name):
+                if pattern.match(relative_path):
                     should_execute = True
             if should_execute:
-                logger.info("pattern:{}, name:{}, path:{}, command:{}".format(
+                # logger.info("event:{}".format(event))
+                logger.info("pattern:{}, relative_path:{}, path:{}, command:{}".format(
                     pattern,
-                    event.name,
+                    relative_path,
                     event.path,
                     command
                 ))
@@ -94,7 +96,7 @@ class EventHandler(ProcessEvent):
                     _ = subprocess.run(cmd_list,
                                        #  check=True,
                                        stdout=LogPipe(logger.info),
-                                       stderr=LogPipe(logger.info),
+                                       stderr=LogPipe(logger.info, prefix='[error]'),
                                        universal_newlines=True,
                                        cwd=self.directory)
                 except Exception as e:
@@ -103,24 +105,13 @@ class EventHandler(ProcessEvent):
                                      )
                     raise
 
-                logger.info("complete pattern:{}, name:{}, path:{}, command:{}".format(
+                logger.info("complete pattern:{}, relative_path:{}, path:{}, command:{}".format(
                     pattern,
-                    event.name,
+                    relative_path,
                     event.path,
                     command
                 ))
-                # output, errput = process.stdout, process.stderr
-                # if output:
-                #     logger.info(output)
-                # if errput:
-                #     logger.error(errput)
-                # raise Exception("Failed called with {}, {}, {}".format(
-                #     command,
-                #     output,
-                #     errput
-                # ))
-
-                # return output, errput
+                
 
 
 logger = logging.getLogger('cqh_file_watcher')

@@ -2,7 +2,7 @@
     "directory": "{{proj_dir}}",
     "command_list":[
         {
-            "pattern": ".*\\.(py|j2|yaml)",
+            "pattern": "(?!build/).*\\.(py|j2|yaml)",
             "command": "{{ansible_env.HOME}}/env/default/bin/inv copy-files"
         }
     ]

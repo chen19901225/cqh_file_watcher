@@ -4,3 +4,5 @@ cqh_file_watcher.egg-info/
 dist
 venv/
 *.retry
+__pycache__/
+*.pyc
