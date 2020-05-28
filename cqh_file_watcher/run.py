@@ -1,8 +1,7 @@
 #!/usr/bin/python
 # coding:utf-8
+from queue import Queue
 import click
-import shlex
-import subprocess
 import re
 import json
 import sys
@@ -11,48 +10,25 @@ import logging
 import os
 from pyinotify import WatchManager, Notifier, ProcessEvent, IN_DELETE, IN_CREATE, IN_MODIFY
 # https://codereview.stackexchange.com/questions/6567/redirecting-subprocesses-output-stdout-and-stderr-to-the-logging-module
-import threading
 
-
-class LogPipe(threading.Thread):
-
-    def __init__(self, log_func, prefix=''):
-        """Setup the object with a logger and a loglevel
-        and start the thread
-        """
-        threading.Thread.__init__(self)
-        self.daemon = False
-        self.log_func = log_func
-        self.prefix = prefix
-        self.fdRead, self.fdWrite = os.pipe()
-        self.pipeReader = os.fdopen(self.fdRead)
-        self.start()
-
-    def fileno(self):
-        """Return the write file descriptor of the pipe
-        """
-        return self.fdWrite
-
-    def run(self):
-        """Run the thread, logging everything.
-        """
-        for line in iter(self.pipeReader.readline, ''):
-            self.log_func(self.prefix + line.strip("\n"))
-
-        self.pipeReader.close()
-
-    def close(self):
-        """Close the write end of the pipe.
-        """
-        os.close(self.fdWrite)
+from .command_caller import CommandCaller
 
 
 class EventHandler(ProcessEvent):
     def __init__(self, logger, command_list, directory):
         super().__init__()
         self.logger = logger
+        self.queue = Queue(maxsize=1)
+        self.command_callder = CommandCaller(self.queue, logger)
         self.command_list = command_list
         self.directory = directory.rstrip("/")
+
+    def start(self):
+        self.logger.info("begin call command_caller")
+        self.command_callder.start()
+
+    def stop(self):
+        self.queue.put((True, None), True)
 
     def process_IN_CREATE(self, event):
         self.handle_event(event)
@@ -67,7 +43,7 @@ class EventHandler(ProcessEvent):
         self.handle_event(event)
 
     def handle_event(self, event):
-        # self.logger.debug("event:{}".format(event))
+        send_data_list = []
         for command_d in self.command_list:
             pattern = command_d.get("pattern")
             # generated_by_dict_unpack: command_d
@@ -83,34 +59,23 @@ class EventHandler(ProcessEvent):
                 if pattern.match(relative_path):
                     should_execute = True
             if should_execute:
-                # logger.info("event:{}".format(event))
-                logger.info("pattern:{}, relative_path:{}, path:{}, command:{}".format(
-                    pattern,
-                    relative_path,
-                    event.path,
-                    command
-                ))
-                cmd_list = shlex.split(command)
-                # logging.info("[system], cmd_list:{}".format(cmd_list))
-                try:
-                    _ = subprocess.run(cmd_list,
-                                       #  check=True,
-                                       stdout=LogPipe(logger.info),
-                                       stderr=LogPipe(logger.info, prefix='[error]'),
-                                       universal_newlines=True,
-                                       cwd=self.directory)
-                except Exception as e:
-                    logger.exception("fail to run command:{}, {}".format(command,
-                                                                         e),
-                                     )
-                    raise
+                queue_data = dict(
+                    pattern=pattern,
+                    relative_path=relative_path,
+                    path=event.path,
+                    command=command,
+                    directory = self.directory
+                )
+                send_data_list.append(queue_data)
+                    
+        if send_data_list:
+            if self.queue.full():
+                logger.debug("queue is full, so doest not put it")
+            else:
+                
+                self.queue.put([False, send_data_list])
 
-                logger.info("complete pattern:{}, relative_path:{}, path:{}, command:{}".format(
-                    pattern,
-                    relative_path,
-                    event.path,
-                    command
-                ))
+                
 
 
 logger = logging.getLogger('cqh_file_watcher')
@@ -144,8 +109,10 @@ def main(level, conf):
 def monitor(path, command_list):
     wm = WatchManager()
     mask = IN_DELETE | IN_CREATE | IN_MODIFY
-    notifier = Notifier(wm, EventHandler(logger, command_list=command_list,
-                                         directory=path))
+    handler = EventHandler(logger, command_list=command_list,
+                           directory=path)
+    notifier = Notifier(wm, handler)
+    handler.start()
     wm.add_watch(path, mask, auto_add=True, rec=True)
     logger.info("now start monitor %s" % path)
     while 1:
@@ -155,6 +122,7 @@ def monitor(path, command_list):
                 notifier.read_events()
         except KeyboardInterrupt:
             notifier.stop()
+            handler.stop()
             break
 
 
