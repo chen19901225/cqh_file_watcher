@@ -10,7 +10,6 @@ python = os.path.join(proj_dir, 'venv/bin/python')
 history_path = os.path.join(proj_dir, '.history')
 
 
-
 def get_branch_name(c):
     out = c.run("git branch")
     # print(out)
@@ -21,6 +20,7 @@ def get_branch_name(c):
     print(current_branch_line)
     current_branch = re.split(r"\s+", current_branch_line)[-1]
     return current_branch
+
 
 def get_line_args(kwargs):
     line = []
@@ -81,7 +81,6 @@ def copy_files(c):
     line_kwargs = get_line_args(kwargs)
     ansible_cmd = f"ansible-playbook {proj_dir}/playbooks/copy-files.yaml {line_kwargs}"
     c.run(ansible_cmd)
-
 
 
 @task

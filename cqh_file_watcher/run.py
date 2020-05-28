@@ -2,7 +2,6 @@
 # coding:utf-8
 import argparse
 from queue import Queue
-import click
 import re
 import json
 import sys
@@ -68,15 +67,13 @@ class EventHandler(ProcessEvent):
                     directory = self.directory
                 )
                 send_data_list.append(queue_data)
-                    
+
         if send_data_list:
             if self.queue.full():
                 logger.debug("queue is full, so doest not put it")
             else:
-                
-                self.queue.put([False, send_data_list])
 
-                
+                self.queue.put([False, send_data_list])
 
 
 logger = logging.getLogger('cqh_file_watcher')
@@ -87,14 +84,15 @@ if not logger.handlers:
     # stream_handler.setLevel(logging.INFO)
     logger.addHandler(stream_handler)
     # logger.
-parser = argparse.ArgumentParser('cqh_file_watcher', 
+parser = argparse.ArgumentParser('cqh_file_watcher',
                                  description='watch directory changes and run commands')
 
 level_choices = logging._nameToLevel
 level_choices = [e.lower() for e in level_choices]
 
-parser.add_argument("--level",dest='level', type=str, default="info", choices=level_choices)
-parser.add_argument("--conf", dest='conf',help="conf path", required=True)
+parser.add_argument("--level", dest='level', type=str, default="info", choices=level_choices)
+parser.add_argument("--conf", dest='conf', help="conf path", required=True)
+
 
 def main(argv=None):
     if argv is not None:
@@ -102,6 +100,7 @@ def main(argv=None):
     else:
         convert_args = parser.parse_args()
     _inner_run(convert_args.level, convert_args.conf)
+
 
 def _inner_run(level, conf):
     """Simple program that greets NAME for a total of COUNT times."""
@@ -138,4 +137,4 @@ def monitor(path, command_list):
 
 
 if __name__ == "__main__":
-    main(["--level=debug" ,"--conf=example.json"])
+    main(["--level=debug", "--conf=example.json"])

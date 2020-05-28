@@ -3,9 +3,10 @@ import setuptools
 with open("README.rst", "r") as fh:
     long_description = fh.read()
 
+
 setuptools.setup(
     name="cqh_file_watcher",  # Replace with your own username
-    version="0.0.17",
+    version="0.0.18",
     author="chenqinghe",
     author_email="1832866299@qq.com",
     description="tools like vscode file-watcher but for command only",
