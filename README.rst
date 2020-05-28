@@ -7,7 +7,7 @@ something like `File-Watcher` for vscode
 Usage
 -------------------------------------------------
 
-``cqh-file-watch -c ***.conf``
+``cqh-file-watcher -c ***.conf``
 
 conf example
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
