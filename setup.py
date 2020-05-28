@@ -3,7 +3,6 @@ import setuptools
 with open("README.rst", "r") as fh:
     long_description = fh.read()
 
-
 setuptools.setup(
     name="cqh_file_watcher",  # Replace with your own username
     version="0.0.17",
