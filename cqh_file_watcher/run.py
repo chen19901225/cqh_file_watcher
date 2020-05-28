@@ -59,6 +59,7 @@ class EventHandler(ProcessEvent):
                 if pattern.match(relative_path):
                     should_execute = True
             if should_execute:
+                # push command data
                 queue_data = dict(
                     pattern=pattern,
                     relative_path=relative_path,
@@ -70,7 +71,7 @@ class EventHandler(ProcessEvent):
 
         if send_data_list:
             if self.queue.full():
-                logger.debug("queue is full, so doest not put it")
+                logger.debug("queue is full, so does not put it")
             else:
 
                 self.queue.put([False, send_data_list])
@@ -81,9 +82,7 @@ if not logger.handlers:
     stream_handler = logging.StreamHandler(stream=sys.stdout)
     stream_handler.setFormatter(logging.Formatter('[%(levelname)1.1s %(asctime)s %(module)s:%(lineno)d] %(message)s',
                                                   datefmt='%y%m%d %H:%M:%S'))
-    # stream_handler.setLevel(logging.INFO)
     logger.addHandler(stream_handler)
-    # logger.
 parser = argparse.ArgumentParser('cqh_file_watcher',
                                  description='watch directory changes and run commands')
 

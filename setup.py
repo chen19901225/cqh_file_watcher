@@ -6,7 +6,7 @@ with open("README.rst", "r") as fh:
 
 setuptools.setup(
     name="cqh_file_watcher",  # Replace with your own username
-    version="0.0.18",
+    version="0.0.19",
     author="chenqinghe",
     author_email="1832866299@qq.com",
     description="tools like vscode file-watcher but for command only",
