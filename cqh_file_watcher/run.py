@@ -1,5 +1,6 @@
 #!/usr/bin/python
 # coding:utf-8
+import argparse
 from queue import Queue
 import click
 import re
@@ -11,7 +12,7 @@ import os
 from pyinotify import WatchManager, Notifier, ProcessEvent, IN_DELETE, IN_CREATE, IN_MODIFY
 # https://codereview.stackexchange.com/questions/6567/redirecting-subprocesses-output-stdout-and-stderr-to-the-logging-module
 
-from .command_caller import CommandCaller
+from cqh_file_watcher.command_caller import CommandCaller
 
 
 class EventHandler(ProcessEvent):
@@ -86,13 +87,23 @@ if not logger.handlers:
     # stream_handler.setLevel(logging.INFO)
     logger.addHandler(stream_handler)
     # logger.
+parser = argparse.ArgumentParser('cqh_file_watcher', 
+                                 description='watch directory changes and run commands')
 
+level_choices = logging._nameToLevel
+level_choices = [e.lower() for e in level_choices]
 
-@click.command()
-@click.option('--level', default='info', help='Number of greetings.')
-@click.option('--conf', prompt='conf path',
-              help='The person to greet.')
-def main(level, conf):
+parser.add_argument("--level",dest='level', type=str, default="info", choices=level_choices)
+parser.add_argument("--conf", dest='conf',help="conf path", required=True)
+
+def main(argv=None):
+    if argv is not None:
+        convert_args = parser.parse_args(argv)
+    else:
+        convert_args = parser.parse_args()
+    _inner_run(convert_args.level, convert_args.conf)
+
+def _inner_run(level, conf):
     """Simple program that greets NAME for a total of COUNT times."""
     logger.setLevel(getattr(logging, level.upper()))
     if not os.path.exists(conf):
@@ -127,4 +138,4 @@ def monitor(path, command_list):
 
 
 if __name__ == "__main__":
-    main()
+    main(["--level=debug" ,"--conf=example.json"])

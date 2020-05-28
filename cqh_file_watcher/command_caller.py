@@ -49,7 +49,7 @@ class CommandCaller(threading.Thread):
         logger = self.logger
         while 1:
 
-            logger.info("begin for while")
+            logger.debug("begin for loop")
             try:
                 is_end, data_list = self.task_queue.get()
                 if is_end:
