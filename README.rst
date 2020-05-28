@@ -4,12 +4,12 @@ cqh_file_watcher
 something like `File-Watcher` for vscode
 
 
-## Usage
+Usage
 -------------------------------------------------
 
-`cqh-file-watch -c ***.conf`
+``cqh-file-watch -c ***.conf``
 
-### conf example
+conf example
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
