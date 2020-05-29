@@ -59,12 +59,14 @@ class CommandCaller(threading.Thread):
                     # generated_by_dict_unpack: data_d
                     pattern, relative_path, command, path = data_d["pattern"], data_d["relative_path"], data_d["command"], data_d["path"]
                     directory = data_d["directory"]
+                    logger.info('='*80)
                     logger.info("pattern:{}, relative_path:{}, path:{}, command:{}".format(
                         pattern,
                         relative_path,
                         path,
                         command
                     ))
+                    logger.info('='*80)
                     cmd_list = shlex.split(command)
                     # logging.info("[system], cmd_list:{}".format(cmd_list))
 
@@ -90,13 +92,14 @@ class CommandCaller(threading.Thread):
                                                                              e),
                                          )
                         raise
-
+                    logger.info('*'*80)
                     logger.info("complete pattern:{}, relative_path:{}, path:{}, command:{}".format(
                         pattern,
                         relative_path,
                         path,
                         command
                     ))
+                    logger.info('*'*80)
 
             except Exception as e:
                 logger.exceptioin("fail in CommandCaller {}".format(e))
