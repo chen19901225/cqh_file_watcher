@@ -59,14 +59,13 @@ class CommandCaller(threading.Thread):
                     # generated_by_dict_unpack: data_d
                     pattern, relative_path, command, path = data_d["pattern"], data_d["relative_path"], data_d["command"], data_d["path"]
                     directory = data_d["directory"]
-                    logger.info('='*80)
+                    logger.info('start command'.center(80, '='))
                     logger.info("pattern:{}, relative_path:{}, path:{}, command:{}".format(
                         pattern,
                         relative_path,
                         path,
                         command
                     ))
-                    logger.info('='*80)
                     cmd_list = shlex.split(command)
                     # logging.info("[system], cmd_list:{}".format(cmd_list))
 
@@ -75,9 +74,14 @@ class CommandCaller(threading.Thread):
                             method(prefix + line.decode("utf-8").rstrip("\n"))
 
                     try:
+                        """
+                        对于 subprocess.Popen要注意的事情
+                        1. cmd不应该是cd directory && call it 这种形式，不然的话，如果call it 报错的话，这种形式会导致 没有错误日志
+                        """
 
                         process = subprocess.Popen(cmd_list,
                                                    #  check=True,
+                                                   bufsize=1,
                                                    stdout=subprocess.PIPE,
                                                    stderr=subprocess.STDOUT,
                                                    cwd=directory)
@@ -92,14 +96,13 @@ class CommandCaller(threading.Thread):
                                                                              e),
                                          )
                         raise
-                    logger.info('*'*80)
                     logger.info("complete pattern:{}, relative_path:{}, path:{}, command:{}".format(
                         pattern,
                         relative_path,
                         path,
                         command
                     ))
-                    logger.info('*'*80)
+                    logger.info('end command'.center(80, '*'))
 
             except Exception as e:
-                logger.exceptioin("fail in CommandCaller {}".format(e))
+                logger.exception("fail in CommandCaller {}".format(e))

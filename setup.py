@@ -3,10 +3,23 @@ import setuptools
 with open("README.rst", "r") as fh:
     long_description = fh.read()
 
+import os
+name = 'cqh_file_watcher'
+_dir = os.path.dirname(os.path.abspath(__file__))
+
+init_path = os.path.join(_dir, name, '__init__.py')
+
+
+def read_version():
+    content = open(init_path).readlines()[0]
+    quote_index = content.index('"')
+    version = content[quote_index + 1:-1]
+    return version
+
 
 setuptools.setup(
-    name="cqh_file_watcher",  # Replace with your own username
-    version="0.0.21",
+    name=name,  # Replace with your own username
+    version=read_version(),
     author="chenqinghe",
     author_email="1832866299@qq.com",
     description="tools like vscode file-watcher but for command only",

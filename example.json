@@ -1,10 +1,10 @@
 {
-    "directory": "/home/vagrant/code/note2",
+    "directory": "/home/vagrant/code/coder",
     "command_list": [
         {
             "pattern": ".*\\.rst",
-            "command": "/home/vagrant/env/default/bin/sphinx-build -M html . _build"
+            "command": "/home/vagrant/env/default/bin/sphinx-build -M html . _build",
+            "directory": "/home/vagrant/code/coder/docs"
         }
-
     ]
 }

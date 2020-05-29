@@ -1,5 +1,6 @@
 #!/usr/bin/python
 # coding:utf-8
+from cqh_file_watcher import __version__
 import argparse
 from queue import Queue
 import re
@@ -48,6 +49,7 @@ class EventHandler(ProcessEvent):
             pattern = command_d.get("pattern")
             # generated_by_dict_unpack: command_d
             command = command_d["command"]
+            directory = command_d.get("directory") or self.directory
             relative_path = event.pathname[len(self.directory) + 1:]
             should_execute = False
             if not pattern:
@@ -65,7 +67,7 @@ class EventHandler(ProcessEvent):
                     relative_path=relative_path,
                     path=event.path,
                     command=command,
-                    directory = self.directory
+                    directory=directory,
                 )
                 send_data_list.append(queue_data)
 
@@ -107,6 +109,7 @@ def _inner_run(level, conf):
     if not os.path.exists(conf):
         logger.error("conf not exitst {}".format(conf))
         return
+    logger.debug("version:{}".format(__version__))
     content_d = json.loads(open(conf, "r", encoding='utf-8').read())
     logger.debug("content:{}".format(json.dumps(
         content_d, ensure_ascii=False, indent=2)))
