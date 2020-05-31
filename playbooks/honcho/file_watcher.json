@@ -1,0 +1,9 @@
+{
+    "directory": "${DIRECTORY}",
+    "command_list":[
+        {
+            "pattern": "(?!build/).*\\.(py|j2|yaml)",
+            "command": "${HOME}/env/default/bin/inv copy-files"
+        }
+    ]
+}

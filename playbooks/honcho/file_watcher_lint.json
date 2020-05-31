@@ -1,0 +1,9 @@
+{
+    "directory": "${DIRECTORY}",
+    "command_list":[
+        {
+            "pattern": "(?!build/).*\\.py",
+            "command": "${HOME}/env/default/bin/python -m flake8"
+        }
+    ]
+}

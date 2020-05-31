@@ -1,5 +1,6 @@
 #!/usr/bin/python
 # coding:utf-8
+import os
 from cqh_file_watcher import __version__
 import argparse
 from queue import Queue
@@ -8,11 +9,12 @@ import json
 import sys
 import logging
 
-import os
+
 from pyinotify import WatchManager, Notifier, ProcessEvent, IN_DELETE, IN_CREATE, IN_MODIFY
 # https://codereview.stackexchange.com/questions/6567/redirecting-subprocesses-output-stdout-and-stderr-to-the-logging-module
 
 from cqh_file_watcher.command_caller import CommandCaller
+from cqh_file_watcher import util
 
 
 class EventHandler(ProcessEvent):
@@ -111,6 +113,16 @@ def _inner_run(level, conf):
         return
     logger.debug("version:{}".format(__version__))
     content_d = json.loads(open(conf, "r", encoding='utf-8').read())
+
+    current_dir = os.getcwd()
+    logger.info("current_dir:{}".format(current_dir))
+    env = os.environ.copy()
+    env['DIRECTORY'] = current_dir
+    logger.debug('env:{}'.format(env))
+
+    content_d['directory'] = util.string_replace(content_d['directory'], env)
+    for ele in content_d['command_list']:
+        ele['command'] = util.string_replace(ele['command'], env)
     logger.debug("content:{}".format(json.dumps(
         content_d, ensure_ascii=False, indent=2)))
     # generated_by_dict_unpack: content_d
@@ -120,6 +132,7 @@ def _inner_run(level, conf):
 
 def monitor(path, command_list):
     wm = WatchManager()
+
     mask = IN_DELETE | IN_CREATE | IN_MODIFY
     handler = EventHandler(logger, command_list=command_list,
                            directory=path)
@@ -139,4 +152,4 @@ def monitor(path, command_list):
 
 
 if __name__ == "__main__":
-    main(["--level=debug", "--conf=example.json"])
+    main()

@@ -87,8 +87,6 @@ class CommandCaller(threading.Thread):
                                                    cwd=directory)
                         with process.stdout:
                             write_to_logger(process.stdout, logger.info)
-                        # with process.stderr:
-                        #     write_to_logger(process.stderr, logger.error, '[error]')
                         process.wait()
 
                     except Exception as e:

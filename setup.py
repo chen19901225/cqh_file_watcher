@@ -12,14 +12,16 @@ init_path = os.path.join(_dir, name, '__init__.py')
 
 def read_version():
     content = open(init_path).readlines()[0]
+    content = content.strip()
     quote_index = content.index('"')
     version = content[quote_index + 1:-1]
     return version
-
+version = read_version()
+print("version:{}".format(version))
 
 setuptools.setup(
     name=name,  # Replace with your own username
-    version=read_version(),
+    version=version,
     author="chenqinghe",
     author_email="1832866299@qq.com",
     description="tools like vscode file-watcher but for command only",
