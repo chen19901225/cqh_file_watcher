@@ -11,11 +11,12 @@ init_path = os.path.join(_dir, name, '__init__.py')
 
 
 def read_version():
-    content = open(init_path).readlines()[0]
-    content = content.strip()
-    quote_index = content.index('"')
-    version = content[quote_index + 1:-1]
-    return version
+    d = {}
+    code = open(init_path).read()
+    code = compile(code, '<string>', 'exec', dont_inherit=True)
+    exec(code, d, d)
+    return d['__version__']
+
 version = read_version()
 print("version:{}".format(version))
 
