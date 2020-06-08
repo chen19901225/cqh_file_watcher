@@ -87,3 +87,18 @@ def copy_files(c):
 def c_push(c):
     branch_name = get_branch_name(c)
     c.run("git push origin {}".format(branch_name))
+
+
+@task
+def build(c):
+    names = [
+        "build",
+        "dist",
+        f"{proj_name}.egg-info"
+    ]
+    for name in names:
+        abspath = os.path.join(proj_dir, name)
+        if os.path.exists(abspath):
+            print("remove {}".format(abspath))
+            c.run("rm -rf {}".format(abspath))
+    c.run("python setup.py sdist bdist_wheel")

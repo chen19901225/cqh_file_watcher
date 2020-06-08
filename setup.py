@@ -17,6 +17,7 @@ def read_version():
     exec(code, d, d)
     return d['__version__']
 
+
 version = read_version()
 print("version:{}".format(version))
 
@@ -39,7 +40,7 @@ setuptools.setup(
     ],
     entry_points={
         "console_scripts": [
-            "cqh_file_watcher = cqh_file_watcher.run:main",
+            "cqh_file_watcher=cqh_file_watcher.run:main",
         ],
     },
     python_requires='>=3.6',
