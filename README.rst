@@ -59,3 +59,50 @@ directory for command
     ]
     "directory": "/home/vagrant/code/code1"
     }
+
+
+add ignore pattern for one
+:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+
+.. code-block::
+
+    {"command_list":[
+        {
+            "pattern": "*.py",
+            "ignore_pattern": ["_build/.*"],
+            "command": "sudo supervisorctl restart redis"
+            "directory":  "/home/vagrant"
+        }
+    ]
+    "directory": "/home/vagrant/code/code1"
+    }
+
+add ignore pattern for multi
+:::::::::::::::::::::::::::::::::::::::
+
+
+
+.. code-block::
+
+    {"command_list":[
+        {
+            "pattern": "*.py",
+            "ignore_pattern": ["_build/.*" , "_download/.*", "^css/.*", "^_static/.*"],
+            "command": "sudo supervisorctl restart redis"
+            "directory":  "/home/vagrant"
+        }
+    ]
+    "directory": "/home/vagrant/code/code1"
+    }
+
+
+ChangeLog
+-------------------------------------------
+
+0.0.31
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+* add ``ignore_pattern``
+
+* add event `IN_MOVED_TO`, `IN_MOVED_FROM`

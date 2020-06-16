@@ -10,7 +10,7 @@ import sys
 import logging
 
 
-from pyinotify import WatchManager, Notifier, ProcessEvent, IN_DELETE, IN_CREATE, IN_MODIFY
+from pyinotify import WatchManager, Notifier, ProcessEvent, IN_DELETE, IN_CREATE, IN_MODIFY, IN_MOVED_TO, IN_MOVED_FROM
 # https://codereview.stackexchange.com/questions/6567/redirecting-subprocesses-output-stdout-and-stderr-to-the-logging-module
 
 from cqh_file_watcher.command_caller import CommandCaller
@@ -44,24 +44,51 @@ class EventHandler(ProcessEvent):
 
     def process_IN_MOVE(self, event):
         self.handle_event(event)
+    
+    def process_IN_MOVED_TO(self, event):
+        self.handle_event(event)
+    def process_IN_MOVED_FROM(self, event):
+        self.handle_event(event)
 
     def handle_event(self, event):
         send_data_list = []
+        
+        def should_execute_cmd(command, relative_path):
+            pattern, ignore_pattern = command.get("pattern"),  command.get("ignore_pattern")
+            if not ignore_pattern:
+                ignore_pattern = []
+            else:
+                if not isinstance(ignore_pattern, (list, tuple)):
+                    ignore_pattern = [ignore_pattern]
+            def not_in_ignore_patttern(ignore_pattern_list):
+                for _ignore_pattern in ignore_pattern_list:
+                    _ignore_pattern = re.compile(_ignore_pattern)
+                    if _ignore_pattern.match(relative_path):
+                        return False
+                return True
+            if not pattern:
+                return not_in_ignore_patttern(ignore_pattern)
+            pattern = re.compile(pattern)
+            if pattern.match(relative_path):
+                return not_in_ignore_patttern(ignore_pattern)
+                
+        
         for command_d in self.command_list:
             pattern = command_d.get("pattern")
             # generated_by_dict_unpack: command_d
             command = command_d["command"]
             directory = command_d.get("directory") or self.directory
             relative_path = event.pathname[len(self.directory) + 1:]
-            should_execute = False
-            if not pattern:
-                should_execute = True
-            else:
-                if not pattern.endswith("$"):
-                    pattern += "$"
-                pattern = re.compile(pattern)
-                if pattern.match(relative_path):
-                    should_execute = True
+            logger.debug("relative_path:{}".format(relative_path))
+            should_execute = should_execute_cmd(command_d, relative_path)
+            # if not pattern:
+            #     should_execute = True
+            # else:
+            #     if not pattern.endswith("$"):
+            #         pattern += "$"
+            #     pattern = re.compile(pattern)
+            #     if pattern.match(relative_path):
+            #         should_execute = True
             if should_execute:
                 # push command data
                 queue_data = dict(
@@ -132,8 +159,11 @@ def _inner_run(level, conf):
 
 def monitor(path, command_list):
     wm = WatchManager()
-
-    mask = IN_DELETE | IN_CREATE | IN_MODIFY
+    """
+    IN_DELETE | IN_CREATE | IN_MODIFY | 监听不到ansible copy的事件？
+    试一试 IN_MOVED_TO？
+    """
+    mask = IN_DELETE | IN_CREATE | IN_MODIFY | IN_MOVED_FROM | IN_MOVED_TO
     handler = EventHandler(logger, command_list=command_list,
                            directory=path)
     notifier = Notifier(wm, handler)
