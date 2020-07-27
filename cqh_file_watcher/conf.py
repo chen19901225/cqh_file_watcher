@@ -1,4 +1,5 @@
-cqh_file_watcher
+doc = """
+                      cqh_file_watcher
 =============================================
 
 something like `File-Watcher` for vscode
@@ -112,3 +113,4 @@ use DIRECTORY env
     ]
     "directory": "${DIRECTORY}"
     }
+                      """

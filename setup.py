@@ -1,11 +1,13 @@
 import setuptools
 
-with open("README.rst", "r") as fh:
-    long_description = fh.read()
 
 import os
 name = 'cqh_file_watcher'
 _dir = os.path.dirname(os.path.abspath(__file__))
+
+with open(os.path.join(_dir, "README.rst"), "r") as fh:
+    long_description = fh.read()
+
 
 init_path = os.path.join(_dir, name, '__init__.py')
 

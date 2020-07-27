@@ -91,6 +91,7 @@ def c_push(c):
 
 @task
 def build(c):
+    generate(c)
     names = [
         "build",
         "dist",
@@ -102,3 +103,14 @@ def build(c):
             print("remove {}".format(abspath))
             c.run("rm -rf {}".format(abspath))
     c.run("python setup.py sdist bdist_wheel")
+
+
+@task
+def generate(c):
+
+    readme_path = os.path.join(proj_dir, 'README.rst')
+    target_conf_path = os.path.join(proj_dir, proj_name, 'conf.py')
+    with open(readme_path, 'r') as read_f, open(target_conf_path, 'w') as write_f:
+        write_f.write('''doc = """
+                      {}
+                      """\n'''.format(read_f.read()))

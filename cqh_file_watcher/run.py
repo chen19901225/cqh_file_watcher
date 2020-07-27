@@ -1,5 +1,6 @@
 #!/usr/bin/python
 # coding:utf-8
+from argparse import Action, SUPPRESS
 import os
 from cqh_file_watcher import __version__
 import argparse
@@ -44,22 +45,24 @@ class EventHandler(ProcessEvent):
 
     def process_IN_MOVE(self, event):
         self.handle_event(event)
-    
+
     def process_IN_MOVED_TO(self, event):
         self.handle_event(event)
+
     def process_IN_MOVED_FROM(self, event):
         self.handle_event(event)
 
     def handle_event(self, event):
         send_data_list = []
-        
+
         def should_execute_cmd(command, relative_path):
-            pattern, ignore_pattern = command.get("pattern"),  command.get("ignore_pattern")
+            pattern, ignore_pattern = command.get("pattern"), command.get("ignore_pattern")
             if not ignore_pattern:
                 ignore_pattern = []
             else:
                 if not isinstance(ignore_pattern, (list, tuple)):
                     ignore_pattern = [ignore_pattern]
+
             def not_in_ignore_patttern(ignore_pattern_list):
                 for _ignore_pattern in ignore_pattern_list:
                     _ignore_pattern = re.compile(_ignore_pattern)
@@ -71,8 +74,7 @@ class EventHandler(ProcessEvent):
             pattern = re.compile(pattern)
             if pattern.match(relative_path):
                 return not_in_ignore_patttern(ignore_pattern)
-                
-        
+
         for command_d in self.command_list:
             pattern = command_d.get("pattern")
             # generated_by_dict_unpack: command_d
@@ -108,20 +110,54 @@ class EventHandler(ProcessEvent):
                 self.queue.put([False, send_data_list])
 
 
+_dir = os.path.dirname(
+    os.path.abspath(__file__)
+)
+from cqh_file_watcher.conf import doc
+doc_content = doc
+
+
 logger = logging.getLogger('cqh_file_watcher')
 if not logger.handlers:
     stream_handler = logging.StreamHandler(stream=sys.stdout)
     stream_handler.setFormatter(logging.Formatter('[%(levelname)1.1s %(asctime)s %(module)s:%(lineno)d] %(message)s',
                                                   datefmt='%y%m%d %H:%M:%S'))
     logger.addHandler(stream_handler)
+
+
+class DocAction(Action):
+
+    def __init__(self,
+                 option_strings,
+                 dest=SUPPRESS,
+                 default=SUPPRESS,
+                 help=None):
+        super(DocAction, self).__init__(
+            option_strings=option_strings,
+            dest=dest,
+            default=default,
+            nargs=0,
+            help=help)
+
+    def __call__(self, parser, namespace, values, option_string=None):
+        # parser.print_help()
+        print(self.default)
+        parser.exit()
+
+
 parser = argparse.ArgumentParser('cqh_file_watcher',
-                                 description='watch directory changes and run commands')
+                                 description='watch directory changes and run commands',
+                                 )
+
+parser.register("action", "doc", DocAction)
+
 
 level_choices = logging._nameToLevel
 level_choices = [e.lower() for e in level_choices]
 
 parser.add_argument("--level", dest='level', type=str, default="info", choices=level_choices)
 parser.add_argument("--conf", dest='conf', help="conf path", required=True)
+parser.add_argument("--doc", default=doc_content, action='doc')
 
 
 def main(argv=None):
