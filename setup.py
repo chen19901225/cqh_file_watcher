@@ -30,6 +30,7 @@ setuptools.setup(
     author_email="1832866299@qq.com",
     description="tools like vscode file-watcher but for command only",
     long_description=long_description,
+    long_description_content_type="text/x-rst",
     url="https://github.com/chen19901225/cqh_file_watcher",
     packages=setuptools.find_packages(),
     install_requires=[

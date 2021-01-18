@@ -6,5 +6,5 @@ alias tail_log='sudo supervisorctl tail -f file_watcher_${proj_name}'
 alias tail_lint='sudo supervisorctl tail -f file_watcher_lint_${proj_name}'
 alias install='pip install dist/${proj_name}-*-py* -U'
 alias uninstall='pip uninstall ${proj_name} -y'
-alias publish='twine upload dist/*'
+alias publish='twine upload dist/* --verbose'
 alias c-push="inv c-push"

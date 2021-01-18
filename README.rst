@@ -24,7 +24,7 @@ use pattern
             "pattern": "*.py",
             "command": "sudo supervisorctl restart redis"
         }
-    ]
+    ],
     "directory": "/home/vagrant/code/code1"
     }
 
@@ -40,7 +40,7 @@ no pattern
         {
             "command": "echo things changed"
         }
-    ]
+    ],
     "directory": "/home/vagrant/code/code1"
     }
 
@@ -112,3 +112,30 @@ use DIRECTORY env
     ]
     "directory": "${DIRECTORY}"
     }
+
+
+
+
+
+some problems
+-----------------------------------------------------
+
+sre_constants.error: nothing to repeat at position 0
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+
+config
+
+.. code-block::
+
+    {"command_list":[
+        {
+            "pattern": "*\\.py",
+            "ignore_pattern": ["_build/.*" , "_download/.*", "^css/.*", "^_static/.*"],
+            "command": "${DIRECTORY}/venv/bin/invoke gpush"
+        }
+    ],
+    "directory": "${DIRECTORY}"
+    }
+
+replace ``pattern: "*\\.py"`` with ``patter: ".*\\.py"``
