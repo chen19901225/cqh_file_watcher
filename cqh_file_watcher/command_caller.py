@@ -2,6 +2,7 @@ import threading
 import shlex
 import subprocess
 import os
+import time
 
 
 class LogPipe(threading.Thread):
@@ -51,56 +52,59 @@ class CommandCaller(threading.Thread):
 
             logger.debug("begin for loop")
             try:
-                is_end, data_list = self.task_queue.get()
+                is_end, ts,  data_d = self.task_queue.get()
                 if is_end:
                     self.logger.info("CommandCaller complete ")
                     break
-                for data_d in data_list:
+                now = time.time()
+                if now < ts:
+                    self.task_queue.put([is_end, ts, data_d])
+                    continue
                     # generated_by_dict_unpack: data_d
-                    pattern, relative_path, command, path = data_d["pattern"], data_d["relative_path"], data_d["command"], data_d["path"]
-                    directory = data_d["directory"]
-                    logger.info('start command'.center(80, '='))
-                    logger.info("pattern:{}, relative_path:{}, path:{}, command:{}".format(
-                        pattern,
-                        relative_path,
-                        path,
-                        command
-                    ))
-                    cmd_list = shlex.split(command)
-                    # logging.info("[system], cmd_list:{}".format(cmd_list))
+                pattern, relative_path, command, path = data_d["pattern"], data_d["relative_path"], data_d["command"], data_d["path"]
+                directory = data_d["directory"]
+                logger.info('start command'.center(80, '='))
+                logger.info("pattern:{}, relative_path:{}, path:{}, command:{}".format(
+                    pattern,
+                    relative_path,
+                    path,
+                    command
+                ))
+                cmd_list = shlex.split(command)
+                # logging.info("[system], cmd_list:{}".format(cmd_list))
 
-                    def write_to_logger(pipe, method, prefix=''):
-                        for line in iter(pipe.readline, b''):  # b'\n'-separated lines
-                            method(prefix + line.decode("utf-8").rstrip("\n"))
+                def write_to_logger(pipe, method, prefix=''):
+                    for line in iter(pipe.readline, b''):  # b'\n'-separated lines
+                        method(prefix + line.decode("utf-8").rstrip("\n"))
 
-                    try:
-                        """
-                        对于 subprocess.Popen要注意的事情
-                        1. cmd不应该是cd directory && call it 这种形式，不然的话，如果call it 报错的话，这种形式会导致 没有错误日志
-                        """
+                try:
+                    """
+                    对于 subprocess.Popen要注意的事情
+                    1. cmd不应该是cd directory && call it 这种形式，不然的话，如果call it 报错的话，这种形式会导致 没有错误日志
+                    """
 
-                        process = subprocess.Popen(cmd_list,
-                                                   #  check=True,
-                                                   bufsize=1,
-                                                   stdout=subprocess.PIPE,
-                                                   stderr=subprocess.STDOUT,
-                                                   cwd=directory)
-                        with process.stdout:
-                            write_to_logger(process.stdout, logger.info)
-                        process.wait()
+                    process = subprocess.Popen(cmd_list,
+                                                #  check=True,
+                                                bufsize=1,
+                                                stdout=subprocess.PIPE,
+                                                stderr=subprocess.STDOUT,
+                                                cwd=directory)
+                    with process.stdout:
+                        write_to_logger(process.stdout, logger.info)
+                    process.wait()
 
-                    except Exception as e:
-                        logger.exception("fail to run command:{}, {}".format(command,
-                                                                             e),
-                                         )
-                        raise
-                    logger.info("complete pattern:{}, relative_path:{}, path:{}, command:{}".format(
-                        pattern,
-                        relative_path,
-                        path,
-                        command
-                    ))
-                    logger.info('end command'.center(80, '*'))
+                except Exception as e:
+                    logger.exception("fail to run command:{}, {}".format(command,
+                                                                            e),
+                                        )
+                    raise
+                logger.info("complete pattern:{}, relative_path:{}, path:{}, command:{}".format(
+                    pattern,
+                    relative_path,
+                    path,
+                    command
+                ))
+                logger.info('end command'.center(80, '*'))
 
             except Exception as e:
                 logger.exception("fail in CommandCaller {}".format(e))

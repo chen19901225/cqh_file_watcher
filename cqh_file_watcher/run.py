@@ -9,7 +9,7 @@ import re
 import json
 import sys
 import logging
-
+import time
 
 from pyinotify import WatchManager, Notifier, ProcessEvent, IN_DELETE, IN_CREATE, IN_MODIFY, IN_MOVED_TO, IN_MOVED_FROM
 # https://codereview.stackexchange.com/questions/6567/redirecting-subprocesses-output-stdout-and-stderr-to-the-logging-module
@@ -23,6 +23,7 @@ class EventHandler(ProcessEvent):
         super().__init__()
         self.logger = logger
         self.queue = Queue(maxsize=1)
+        self.check_set = dict()
         self.command_callder = CommandCaller(self.queue, logger)
         self.command_list = command_list
         self.directory = directory.rstrip("/")
@@ -32,7 +33,7 @@ class EventHandler(ProcessEvent):
         self.command_callder.start()
 
     def stop(self):
-        self.queue.put((True, None), True)
+        self.queue.put((True, time.time(),  None), True)
 
     def process_IN_CREATE(self, event):
         self.handle_event(event)
@@ -93,21 +94,25 @@ class EventHandler(ProcessEvent):
             #         should_execute = True
             if should_execute:
                 # push command data
-                queue_data = dict(
-                    pattern=pattern,
-                    relative_path=relative_path,
-                    path=event.path,
-                    command=command,
-                    directory=directory,
-                )
-                send_data_list.append(queue_data)
+                now =time.time()
+                if command not in self.check_set or self.check_set[command]  < now:
+                    self.check_set[command] = now + command_d['delay']
+                    queue_data = dict(
+                        pattern=pattern,
+                        relative_path=relative_path,
+                        path=event.path,
+                        command=command,
+                        directory=directory,
+                        ts = time.time() + command_d['delay']
+                    )
+                    send_data_list.append(queue_data)
 
         if send_data_list:
-            if self.queue.full():
-                logger.debug("queue is full, so does not put it")
-            else:
-
-                self.queue.put([False, send_data_list])
+            for item in send_data_list:
+                if self.queue.full():
+                    self.logger.info("queue is full ")
+                    continue
+                self.queue.put([False, item['ts'], item ])
 
 
 _dir = os.path.dirname(
@@ -186,6 +191,9 @@ def _inner_run(level, conf):
     content_d['directory'] = util.string_replace(content_d['directory'], env)
     for ele in content_d['command_list']:
         ele['command'] = util.string_replace(ele['command'], env)
+        if "delay" not in ele:
+            # 命令的延时时间
+            ele['delay'] = 0.5
     logger.debug("content:{}".format(json.dumps(
         content_d, ensure_ascii=False, indent=2)))
     # generated_by_dict_unpack: content_d
